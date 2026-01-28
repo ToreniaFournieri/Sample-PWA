@@ -53,11 +53,122 @@
         #changeButton:active {
             transform: translateY(0);
         }
+
+        .persistence-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+        }
+
+        .persistence-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        #commentInput {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        #saveBtn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        #saveBtn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        #loadBtn {
+            background: #2196F3;
+            color: white;
+        }
+
+        #loadBtn:hover {
+            background: #0b7dda;
+            transform: translateY(-2px);
+        }
+
+        #clearBtn {
+            background: #f44336;
+            color: white;
+        }
+
+        #clearBtn:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        #displayComment {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .status-message {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            text-align: center;
+            min-height: 20px;
+        }
     </style>
 </head>
 <body>
     <div id="word">Hello World</div>
     <button id="changeButton">Button</button>
+
+    <div class="persistence-section">
+        <h2>📝 Comment Persistence</h2>
+        <input
+            type="text"
+            id="commentInput"
+            placeholder="Enter your comment here..."
+            maxlength="500"
+        >
+        <div class="button-group">
+            <button id="saveBtn" class="btn">💾 Save</button>
+            <button id="loadBtn" class="btn">📂 Load</button>
+            <button id="clearBtn" class="btn">🗑️ Clear</button>
+        </div>
+        <div>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Saved Comment:</p>
+            <div id="displayComment">No comment saved yet</div>
+        </div>
+        <div id="statusMessage" class="status-message"></div>
+    </div>
 
     <script>
         // Register service worker
@@ -85,6 +196,64 @@
             currentIndex = (currentIndex + 1) % words.length;
             wordElement.textContent = words[currentIndex];
         });
+
+        // Comment Persistence Logic
+        const commentInput = document.getElementById('commentInput');
+        const saveBtn = document.getElementById('saveBtn');
+        const loadBtn = document.getElementById('loadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const displayComment = document.getElementById('displayComment');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // Load comment on page load
+        window.addEventListener('load', () => {
+            loadComment();
+        });
+
+        // Save button listener
+        saveBtn.addEventListener('click', () => {
+            const comment = commentInput.value.trim();
+            if (comment === '') {
+                showStatus('Please enter a comment first!', 'error');
+                return;
+            }
+            localStorage.setItem('savedComment', comment);
+            showStatus('Comment saved successfully!', 'success');
+        });
+
+        // Load button listener
+        loadBtn.addEventListener('click', () => {
+            loadComment();
+        });
+
+        // Clear button listener
+        clearBtn.addEventListener('click', () => {
+            localStorage.removeItem('savedComment');
+            displayComment.textContent = 'No comment saved yet';
+            commentInput.value = '';
+            showStatus('Comment cleared!', 'info');
+        });
+
+        // Function to load comment from localStorage
+        function loadComment() {
+            const saved = localStorage.getItem('savedComment');
+            if (saved) {
+                displayComment.textContent = saved;
+                showStatus('Comment loaded!', 'success');
+            } else {
+                displayComment.textContent = 'No comment saved yet';
+                showStatus('No saved comment found', 'info');
+            }
+        }
+
+        // Function to show status messages
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.style.color = type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3';
+            setTimeout(() => {
+                statusMessage.textContent = '';
+            }, 3000);
+        }
     </script>
 </body>
 </html>
